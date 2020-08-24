@@ -16,5 +16,20 @@ server = app.listen(port, () => {
 const io = require('socket.io')(server)
 
 io.on('connection', (socket) => {
-    console.log('New connection')
+    console.log('New connection from', socket.client.conn.remoteAddress)
+
+    socket.username = 'anon';
+
+    socket.on('CHANGE_USERNAME', (data) => {
+        console.log('recieved a change username from ', socket.client.conn.remoteAddress, ' with data ', data)
+        socket.username = data.username;
+
+        io.sockets.emit('CHANGE_USERNAME_SUCCESS', socket.username )
+    })
+
+    socket.on('NEW_MESSAGE', (data) => {
+        console.log('Recieved new message from ', socket.client.conn.remoteAddress, ' with data ', data);
+        io.sockets.emit('NEW_MESSAGE', {message: data.message, username: socket.username})
+    })
+
 })
